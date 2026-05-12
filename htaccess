@@ -1,0 +1,22 @@
+
+RewriteEngine on
+RewriteCond %{HTTP_HOST} ^followup\.dalegig\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.followup\.dalegig\.com$
+RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$
+RewriteCond %{REQUEST_URI} !^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$
+RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/(?:\ Ballot169)?
+RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
+RewriteRule ^/?$ "http\:\/\/followup\.dalegig\.com\/index\.php" [R=301,L]
+# Always use https for secure connections
+# Replace 'www.example.com' with your domain name
+# (as it appears on your SSL certificate)
+RewriteEngine On
+RewriteCond %{SERVER_PORT} 80
+RewriteRule ^(.*)$ https://followup.dalegig.com/$1 [R=301,L]
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Defina o pacote “ea-php74” como a linguagem padrão de programação “PHP”.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php74 .php .php7 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit

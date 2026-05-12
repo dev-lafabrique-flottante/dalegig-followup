@@ -1,0 +1,15 @@
+.DS_Store
+css/.DS_Store
+fonts/.DS_Store
+js/.DS_Store
+scss/.DS_Store
+vendors/.DS_Store
+
+# Local secrets and machine-specific config
+CLASSES/conexao.php
+CLASSES/conexao.local.php
+.env
+.env.*
+
+# Legacy local backup with hardcoded access token
+followup_bkp.php
