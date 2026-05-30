@@ -111,6 +111,14 @@ Deployment clues found in [`htaccess`](/Users/raphaelevangelista/Desktop/Bureau%
 - HTTPS redirection is configured
 - cPanel-generated PHP handler is configured for `ea-php74`
 
+HostGator FTP notes discovered during deploy:
+- HostGator document root for production: `/home1/hg2dl269/followup.dalegig.com`
+- FTP username: `deploy@followup.dalegig.com`
+- `ftp.2dlproductions.com` did not resolve from this environment; `followup.dalegig.com` / `ftp.dalegig.com` reached the same FTP account.
+- Use explicit FTPS on port 21. The certificate may not match the FTP hostname, so `curl --ssl-reqd --insecure` was needed locally.
+- Do not store the FTP password in this repository or in AGENTS.md.
+- Important: the HostGator production tree currently does not match this local repository. It has files such as `index.php`, `gig_edit.php`, `gigs_search.php`, `CLASSES/helpers.php`, and `CLASSES/estimate_engine.php`, while this repo has `followup.php`, template `vendors/`, and `partials/`. Verify the remote production tree before uploading files.
+
 Important compatibility note:
 - local syntax checks were run with PHP 8.0.30
 - repo deployment clue points to PHP 7.4 in production
