@@ -52,17 +52,26 @@ app_require_followup_session();
   $nome_gig = '';
   $nome_produtor = '';
   $email_gig = '';
+  $cidade_gig = '';
+  $desc_gig = '';
   $body_novo = '';
   $subject_novo = '';
+  $whatsapp_novo = '';
+  $audience_estimate = '';
+  $ai_prompt = '';
 
   if ($id_proposta > 0 && !empty($dadoproposta['body'])) {
       //obtém dados desta gig atualizados
-      $nome_banda = explode("ofereço-lhe <b>", $dadoproposta['body']);
-      $nome_banda = explode("</b>", $nome_banda[1]);
-      $nome_banda = $nome_banda[0];
-      $nome_gig = explode(" a todos de ", $dadoproposta['body']);
-      $nome_gig = explode(",<br>", $nome_gig[1]);
-      $nome_gig = $nome_gig[0];
+      $nome_banda_partes = explode("ofereço-lhe <b>", $dadoproposta['body']);
+      if (isset($nome_banda_partes[1])) {
+          $nome_banda_partes = explode("</b>", $nome_banda_partes[1]);
+          $nome_banda = $nome_banda_partes[0];
+      }
+      $nome_gig_partes = explode(" a todos de ", $dadoproposta['body']);
+      if (isset($nome_gig_partes[1])) {
+          $nome_gig_partes = explode(",<br>", $nome_gig_partes[1]);
+          $nome_gig = $nome_gig_partes[0];
+      }
 
       //obtém email e nome do produtor
       $consultagig = "SELECT * FROM banco_b_contratantes WHERE venue='" . app_db_escape($conn_gig_dalegig, $nome_gig) . "'";
@@ -70,14 +79,25 @@ app_require_followup_session();
       $dadogig = $consultagig2->fetch_array();
       $nome_produtor = $dadogig['produtor'];
       $email_gig = $dadogig['email'];
+      $cidade_gig = $dadogig['cidade'] . '/' . $dadogig['estado'];
+      $desc_gig = $dadogig['description'];
 
       //altera o body com o nome antigo do produtor para o novo
-      $nome_antigo_produtor = explode("<br>Bom dia ", $dadoproposta['body']);
-      $nome_antigo_produtor = explode(" a todos de ", $nome_antigo_produtor[1]);
-      $nome_antigo_produtor = $nome_antigo_produtor[0];
+      $nome_antigo_produtor_partes = explode("<br>Bom dia ", $dadoproposta['body']);
+      $nome_antigo_produtor = '';
+      if (isset($nome_antigo_produtor_partes[1])) {
+          $nome_antigo_produtor_partes = explode(" a todos de ", $nome_antigo_produtor_partes[1]);
+          $nome_antigo_produtor = $nome_antigo_produtor_partes[0];
+      }
 
       $body_novo = str_replace($nome_antigo_produtor, $nome_produtor, $dadoproposta['body']);
       $subject_novo = str_replace($nome_antigo_produtor, $nome_produtor, $dadoproposta['subject']);
+      $audience_estimate = app_guess_audience_estimate($desc_gig, $cidade_gig);
+      $ai_prompt = app_ai_coherence_prompt($nome_banda, $nome_gig, $cidade_gig, $audience_estimate);
+      $whatsapp_novo = "Bom dia, " . $nome_produtor . ". Tudo bem?\n\n"
+          . "Sou da daleGig e queria retomar a proposta do artista " . $nome_banda . " para " . $nome_gig . ". "
+          . "Pelo perfil da casa em " . $cidade_gig . ", estamos trabalhando com uma estimativa de publico de " . $audience_estimate . ".\n\n"
+          . "Faz sentido conversarmos sobre uma data ou prefere que eu ajuste a proposta antes?";
   }
       
       
@@ -111,7 +131,7 @@ app_require_followup_session();
                                       $tours = $tours." #".$dadotours['id_tour'];
                                   }    
       
-                                  echo "1) <a href=https://www.dalegig.com/gerente/tours target=_blank><b>Clique aqui</b></a> para entrar no dash de propostas e procure pela proposta para <b>".h($nome_venue)."</b> nas tours mais recentes do artista (acione o Rapha se nao possuir acesso)<br><br>2) Entre em <b>tour".h($tours)."</b> e procure a aba da proposta ".h($nome_venue)."</b><br><br>3) Copie a proposta e cole em um corpo de email, enviando como Chico ou Lena. Utilize o assunto <i>Att.: (Coloque o nome do produtor na proposta) - Proposta musical de (Coloque o nome da banda)</i>";
+                                  echo "<div id='proposal-message-panel'>1) <a href=https://www.dalegig.com/gerente/tours target=_blank><b>Clique aqui</b></a> para entrar no dash de propostas e procure pela proposta para <b>".h($nome_venue)."</b> nas tours mais recentes do artista (acione o Rapha se nao possuir acesso)<br><br>2) Entre em <b>tour".h($tours)."</b> e procure a aba da proposta ".h($nome_venue)."</b><br><br>3) Copie a proposta e cole em um corpo de email, enviando como Chico ou Lena. Utilize o assunto <i>Att.: (Coloque o nome do produtor na proposta) - Proposta musical de (Coloque o nome da banda)</i><br><br><button type='button' class='btn btn-warning' onclick='hideProposalMessage()'>Não inserir no WhatsApp</button></div><p id='proposal-message-hidden' style='display:none;color:purple'><b>Exibição removida nesta tela.</b></p><script>function hideProposalMessage(){document.getElementById('proposal-message-panel').style.display='none';document.getElementById('proposal-message-hidden').style.display='block';}</script>";
 
                                   exit;
 
@@ -122,9 +142,21 @@ app_require_followup_session();
                               <h3><b>Destinatário:</b> <?php echo h($email_gig);?></h3>
                               <h3><b>Cole o assunto do email:</b> <?php echo h($subject_novo);?></h3>
                               <br><br>
+                              <h3><b>Estimativa de público:</b> <?php echo h($audience_estimate);?></h3>
+                              <h3><b>Prompt para revisar com IA:</b></h3>
+                              <textarea class="form-control" rows="3" readonly><?php echo h($ai_prompt);?></textarea>
+                              <br>
+                              <div id="proposal-message-panel">
+                              <h2>Mensagem coerente para WhatsApp antes do email:</h2>
+                              <textarea class="form-control" rows="7" readonly><?php echo h($whatsapp_novo);?></textarea>
+                              <br>
+                              <button type="button" class="btn btn-warning" onclick="hideProposalMessage()">Não inserir no WhatsApp</button>
+                              <br><br>
                               <h2>Copie e cole o corpo do email abaixo:</h2>
                               <br><br>
                               <div style="white-space:pre-wrap"><?php echo app_safe_html_block($body_novo);?></div>
+                              </div>
+                              <p id="proposal-message-hidden" style="display:none;color:purple"><b>Exibição removida nesta tela.</b></p>
                                 
                             </div>
                           </div>
@@ -154,6 +186,10 @@ app_require_followup_session();
               window.onscroll = function (e) {
                 posicao = window.scrollY;
                 localStorage.setItem('posicaoScroll', JSON.stringify(posicao));
+              }
+              function hideProposalMessage() {
+                document.getElementById('proposal-message-panel').style.display = 'none';
+                document.getElementById('proposal-message-hidden').style.display = 'block';
               }
           </script>
     <!-- base:js -->

@@ -22,8 +22,11 @@ Este repositório foi preparado para nao versionar segredos locais:
 - `DALEGIG_DB_MAIN`
 - `DALEGIG_DB_INTRANET`
 - `FOLLOWUP_ACCESS_TOKEN`
+- `FOLLOWUP_ALLOWED_EMAILS` (opcional, lista separada por virgulas)
+- `FOLLOWUP_ALLOW_TOKEN_LOGIN=1` (opcional, apenas para manter acesso legado por token)
 
 ## Observacoes
 
 - O projeto nao inclui Composer, npm, migrations ou suite de testes.
 - O deploy aparente usa Apache/cPanel e PHP 7.4.
+- O acesso principal usa login por codigo enviado por email para enderecos autorizados.

@@ -712,6 +712,9 @@ if(isset($_POST['rec_nao_consegui'])){
             $photo1_gig_url = h($photo1_gig);
             $photo2_gig_url = h($photo2_gig);
             $photo3_gig_url = h($photo3_gig);
+            $audience_estimate = app_guess_audience_estimate($desc_gig, $cidade_gig);
+            $audience_estimate_html = h($audience_estimate);
+            $ai_prompt_html = h(app_ai_coherence_prompt($dadobanda['name'], $nome_gig, $cidade_gig, $audience_estimate));
 
             //check se o produtor existe para abrir card ou cancelar card
             if(!empty($nome_produtor)&&!empty($nome_gig)){
@@ -805,6 +808,7 @@ if(isset($_POST['rec_nao_consegui'])){
                             }
                             
                             echo "<p><b>Um pouco sobre a GIG: </b>".$desc_gig_html."</p>
+                            <p><b>Estimativa de público para usar na oferta/WhatsApp: </b>".$audience_estimate_html."</p>
                             <br>
                             <h3 style='color:orange'><b>Abordagem</b></h3>  
                             <p>1) Perguntar o que acha da proposta enviada por email dia  ".date("d/m",strtotime($dataenviada));
@@ -835,8 +839,10 @@ if(isset($_POST['rec_nao_consegui'])){
                                 echo " pela Lena (bookings@dalegig.com) com acordo em aberto a negociar</b>.</p>";
                             }
                             
-                            echo "<p>2) Estudar pontos fortes do artista e se preparar com até 3</p>
-                            <p>3) Obter a resposta: se interessa conversar diretamente com o artista. Caso ele responda interessado, ele receberá as próximas conversas por email";
+                            echo "<p>2) Antes de colar qualquer oferta no WhatsApp, revise a mensagem com IA usando este contexto: <textarea class='form-control' rows='3' readonly>".$ai_prompt_html."</textarea></p>
+                            <p>3) Estudar pontos fortes do artista e preparar até 3 argumentos conectados com o perfil da GIG, sem inventar dados.</p>
+                            <p>4) Se a GIG for nova ou estiver pouco preenchida, fazer onboarding: perguntar tipo de programação, faixa real de público, dias/horários preferidos, estilos que funcionam, ticket/cache médio, restrições técnicas e melhor canal para propostas.</p>
+                            <p>5) Obter a resposta: se interessa conversar diretamente com o artista. Caso ele responda interessado, ele receberá as próximas conversas por email";
                             
                             if($dadoflup['bancoa_ou_b']==0){
                                 echo " ou pelo painel dele na <a href=https://gig.dalegig.com target=_blank>gig.dalegig.com</a>";
@@ -848,7 +854,7 @@ if(isset($_POST['rec_nao_consegui'])){
                             $check_sesc = preg_match_all("/sesc/i",$nome_gig,$macthes);
                             if($check_sesc==0){
                                 
-                                echo "<p>4) Se sentir abertura: 
+                                echo "<p>6) Se sentir abertura:
                                     <li>Convidar para responder as propostas que chegam por email, pois ele recebe remuneração (<a href=images/saldo1.png target=_blank>Explicativo 1</a> / <a href=images/saldo2.png target=_blank>Explicativo 2</a>)</li>";
                                 
                                 
@@ -1002,6 +1008,7 @@ if(isset($_POST['rec_nao_consegui'])){
                             }
                             
                             echo "<p><b>Um pouco sobre a GIG: </b>".$desc_gig_html."</p>
+                            <p><b>Estimativa de público para orientar a conversa: </b>".$audience_estimate_html."</p>
                             <br>
                             <h3 style='color:orange'><b>Abordagem da RECUTUCADA</b></h3>";
                             
@@ -1026,10 +1033,11 @@ if(isset($_POST['rec_nao_consegui'])){
                             }
                             
                             
-                            echo "<p>2) Estudar pontos fortes do artista</p>";
-                            
-                            
-                            echo "<p>3) Entra em contato com o contratante informando a última mensagem do músico e solicitando uma resposta a esta mensagem e se aceita uma chamada com o artista em dia/hora a desejar.";
+                            echo "<p>2) Revisar a mensagem com IA antes de enviar: <textarea class='form-control' rows='3' readonly>".$ai_prompt_html."</textarea></p>";
+                            echo "<p>3) Estudar pontos fortes do artista</p>";
+
+
+                            echo "<p>4) Entra em contato com o contratante informando a última mensagem do músico e solicitando uma resposta a esta mensagem e se aceita uma chamada com o artista em dia/hora a desejar.";
                             
                             if($dadoflup['bancoa_ou_b']==0){
                                 echo " ou pelo painel dele na <a href=https://gig.dalegig.com target=_blank>gig.dalegig.com</a>";
@@ -1041,7 +1049,7 @@ if(isset($_POST['rec_nao_consegui'])){
                             $check_sesc = preg_match_all("/sesc/i",$nome_gig,$macthes);
                             if($check_sesc==0){
                                 
-                                echo "<p>4) Se sentir abertura: 
+                                echo "<p>5) Se sentir abertura:
                                     <li>Convidar para responder as propostas que chegam por email, pois ele recebe remuneração (<a href=images/saldo1.png target=_blank>Explicativo 1</a> / <a href=images/saldo2.png target=_blank>Explicativo 2</a>)</li>";
                                 
                                 

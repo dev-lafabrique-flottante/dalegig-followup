@@ -56,9 +56,14 @@ app_require_followup_session();
 						<div class="col-lg-12 grid-margin stretch-card">
                           <div class="card" style='border:2px solid purple'>
                             <div class="card-body">
+                              <button type="button" class="btn btn-warning" onclick="hideProposalMessage()">Não inserir no WhatsApp</button>
+                              <br><br>
+                              <div id="proposal-message-panel">
                               <?php
                                 echo app_safe_html_block($dadoproposta['body']);
                               ?>
+                              </div>
+                              <p id="proposal-message-hidden" style="display:none;color:purple"><b>Exibição removida nesta tela.</b></p>
                             </div>
                           </div>
                         </div> 
@@ -87,6 +92,10 @@ app_require_followup_session();
               window.onscroll = function (e) {
                 posicao = window.scrollY;
                 localStorage.setItem('posicaoScroll', JSON.stringify(posicao));
+              }
+              function hideProposalMessage() {
+                document.getElementById('proposal-message-panel').style.display = 'none';
+                document.getElementById('proposal-message-hidden').style.display = 'block';
               }
           </script>
     <!-- base:js -->
